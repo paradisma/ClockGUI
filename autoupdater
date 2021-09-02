@@ -1,0 +1,27 @@
+#!/bin/bash
+
+behindStr="Your branch is behind"
+
+#First bring remote refs up to date.
+echo "Checking for updates.."
+git remote update > /dev/null 2>&1
+
+#Store git status to see if branch up to date.
+gitStatus=$(git status -uno)
+
+#If the local repo is behind pull from git and build.
+if [[ "$gitStatus" == *"$behindStr"* ]]
+then
+	echo "New version available, updating..."
+	git pull > /dev/null 2>&1
+
+	echo "Rebuilding.."
+	msbuild >/dev/null 2>&1
+
+	#Kill the old process if it is running.
+	killall clockExe_2
+	killall mono
+else
+	echo "Already up to date."
+fi
+
